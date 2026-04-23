@@ -1,22 +1,29 @@
-export type PunchRecord = {
-  in?: string; // 出勤時刻 "09:00"
-  out?: string; // 退勤時刻 "18:00"
-  break?: number; // 休憩時間（分）例: 60
-  overtime?: number; // 残業時間（分）例: 30
+export type AttendanceResponse = {
+  id: string;
+  user_id: string;
+  clock_in?: string | null; // "2024-01-01T09:00:00+09:00"
+  clock_out?: string | null; // "2024-01-01T09:00:00+09:00"
+  date: string;
+  created_at: string;
+  updated_at: string;
 };
 
-export interface Records {
-  [key: string]: PunchRecord;
-}
-export interface AuthUser {
+export type AuthUser = {
   token: string;
   user: User;
-}
-export interface User {
+};
+export type User = {
   id: string;
   email: string;
   name: string;
   role: string;
   created_at: string;
   updated_at: string;
-}
+};
+
+export type AttendanceRecord = {
+  in?: string;
+  out?: string;
+};
+
+export type AttendanceRecords = Record<string, AttendanceRecord>; // キー: "2024-01-01"

@@ -1,11 +1,11 @@
 import React from "react";
-import type { Records } from "../types";
+import type { AttendanceRecords } from "../types";
 import { dateKey, fmtMinutes } from "../utils";
 
 type Props = {
   year: number;
   month: number; // 0-indexed
-  records: Records;
+  attendanceRecords: AttendanceRecords;
   today: Date;
   onPrev: () => void;
   onNext: () => void;
@@ -16,7 +16,7 @@ const DOW = ["日", "月", "火", "水", "木", "金", "土"];
 export const Calendar: React.FC<Props> = ({
   year,
   month,
-  records,
+  attendanceRecords,
   today,
   onPrev,
   onNext,
@@ -29,7 +29,7 @@ export const Calendar: React.FC<Props> = ({
     const date = new Date(year, month, i + 1);
     const key = dateKey(date);
     const dow = date.getDay();
-    return { date, key, dow, record: records[key] };
+    return { date, key, dow, record: attendanceRecords[key] };
   });
 
   const thStyle: React.CSSProperties = {
@@ -62,7 +62,13 @@ export const Calendar: React.FC<Props> = ({
         }}
       >
         <NavBtn onClick={onPrev}>&#8249;</NavBtn>
-        <span style={{ fontSize: 15, fontWeight: 500, color: "var(--text-primary)" }}>
+        <span
+          style={{
+            fontSize: 15,
+            fontWeight: 500,
+            color: "var(--text-primary)",
+          }}
+        >
           {year}年{month + 1}月
         </span>
         <NavBtn onClick={onNext}>&#8250;</NavBtn>
@@ -70,15 +76,15 @@ export const Calendar: React.FC<Props> = ({
 
       {/* テーブル */}
       <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+        <table
+          style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
+        >
           <thead>
             <tr style={{ background: "var(--surface-muted)" }}>
               <th style={thStyle}>日付</th>
               <th style={{ ...thStyle, textAlign: "center" }}>曜日</th>
               <th style={{ ...thStyle, textAlign: "center" }}>出勤</th>
               <th style={{ ...thStyle, textAlign: "center" }}>退勤</th>
-              <th style={{ ...thStyle, textAlign: "center" }}>休憩</th>
-              <th style={{ ...thStyle, textAlign: "center" }}>残業</th>
             </tr>
           </thead>
           <tbody>
@@ -101,7 +107,11 @@ export const Calendar: React.FC<Props> = ({
               };
 
               const dowColor =
-                dow === 0 ? "var(--red)" : dow === 6 ? "var(--blue)" : "var(--text-muted)";
+                dow === 0
+                  ? "var(--red)"
+                  : dow === 6
+                    ? "var(--blue)"
+                    : "var(--text-muted)";
 
               return (
                 <tr key={key} style={rowStyle}>
@@ -111,7 +121,11 @@ export const Calendar: React.FC<Props> = ({
                       style={{
                         fontSize: 13,
                         fontWeight: isToday ? 500 : 400,
-                        color: isToday ? "var(--blue)" : isWeekend ? dowColor : "var(--text-primary)",
+                        color: isToday
+                          ? "var(--blue)"
+                          : isWeekend
+                            ? dowColor
+                            : "var(--text-primary)",
                         fontFamily: "var(--font-mono)",
                       }}
                     >
@@ -134,51 +148,51 @@ export const Calendar: React.FC<Props> = ({
                   </td>
 
                   {/* 曜日 */}
-                  <td style={{ ...tdBase, textAlign: "center", color: dowColor }}>
+                  <td
+                    style={{ ...tdBase, textAlign: "center", color: dowColor }}
+                  >
                     {DOW[dow]}
                   </td>
 
                   {/* 出勤 */}
                   <td style={{ ...tdBase, textAlign: "center" }}>
                     {record?.in ? (
-                      <span style={{ color: "var(--green)", fontFamily: "var(--font-mono)", fontWeight: 500 }}>
+                      <span
+                        style={{
+                          color: "var(--green)",
+                          fontFamily: "var(--font-mono)",
+                          fontWeight: 500,
+                        }}
+                      >
                         {record.in}
                       </span>
                     ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 11 }}>--</span>
+                      <span
+                        style={{ color: "var(--text-muted)", fontSize: 11 }}
+                      >
+                        --
+                      </span>
                     )}
                   </td>
 
                   {/* 退勤 */}
                   <td style={{ ...tdBase, textAlign: "center" }}>
                     {record?.out ? (
-                      <span style={{ color: "var(--red)", fontFamily: "var(--font-mono)", fontWeight: 500 }}>
+                      <span
+                        style={{
+                          color: "var(--red)",
+                          fontFamily: "var(--font-mono)",
+                          fontWeight: 500,
+                        }}
+                      >
                         {record.out}
                       </span>
                     ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 11 }}>--</span>
-                    )}
-                  </td>
-
-                  {/* 休憩 */}
-                  <td style={{ ...tdBase, textAlign: "center" }}>
-                    {record?.break ? (
-                      <span style={{ color: "var(--text-primary)", fontFamily: "var(--font-mono)" }}>
-                        {fmtMinutes(record.break)}
+                      <span
+                        style={{ color: "var(--text-muted)", fontSize: 11 }}
+                      >
+                        --
                       </span>
-                    ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 11 }}>--</span>
-                    )}
-                  </td>
-
-                  {/* 残業 */}
-                  <td style={{ ...tdBase, textAlign: "center" }}>
-                    {record?.overtime ? (
-                      <span style={{ color: "var(--amber)", fontFamily: "var(--font-mono)", fontWeight: 500 }}>
-                        {fmtMinutes(record.overtime)}
-                      </span>
-                    ) : (
-                      <span style={{ color: "var(--text-muted)", fontSize: 11 }}>--</span>
                     )}
                   </td>
                 </tr>

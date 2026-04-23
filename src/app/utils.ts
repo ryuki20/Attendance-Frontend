@@ -1,3 +1,5 @@
+import { AttendanceRecords, AttendanceResponse } from "./types";
+
 export function dateKey(d: Date): string {
   return [
     d.getFullYear(),
@@ -38,4 +40,26 @@ export function fmtMinutes(minutes: number | undefined): string {
   const m = minutes % 60;
   if (h === 0) return `${m}m`;
   return `${h}h${String(m).padStart(2, "0")}m`;
+}
+
+export function isoToHHMM(iso: string | null | undefined): string | undefined {
+  if (!iso) return undefined;
+  const date = new Date(iso);
+  return [
+    String(date.getHours()).padStart(2, "0"),
+    String(date.getMinutes()).padStart(2, "0"),
+  ].join(":");
+}
+
+export function toRecords(
+  attendances: AttendanceResponse[],
+): AttendanceRecords {
+  const records: AttendanceRecords = {};
+  attendances.forEach((a) => {
+    records[a.date] = {
+      in: isoToHHMM(a.clock_in),
+      out: isoToHHMM(a.clock_out),
+    };
+  });
+  return records;
 }

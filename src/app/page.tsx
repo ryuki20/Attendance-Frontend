@@ -1,67 +1,48 @@
 "use client";
-import { useState, useCallback } from "react";
-import type { Records, AuthUser } from "./types";
-import { dateKey, fmtTime } from "./utils";
+import { useState, useCallback, useEffect } from "react";
+import { AttendanceRecords, AttendanceResponse, User } from "./types";
+import { dateKey, fmtTime, toRecords } from "./utils";
 import { PunchButton } from "./components/PunchButton";
 import { Calendar } from "./components/Calendar";
 import { SummaryCards } from "./components/SummaryCards";
 import { AuthGuard } from "./components/AuthGuard";
 import { useRouter } from "next/navigation";
-
-// サンプルデータ（実際はlocalStorageやAPIから取得）
-function buildSeedRecords(): Records {
-  const today = new Date();
-  const y = today.getFullYear();
-  const m = today.getMonth() + 1;
-  const pad = (n: number) => String(n).padStart(2, "0");
-
-  const seed: {
-    d: number;
-    in: string;
-    out: string;
-    break: number;
-    overtime: number;
-  }[] = [
-    { d: 1, in: "09:02", out: "18:15", break: 60, overtime: 0 },
-    { d: 2, in: "08:55", out: "18:30", break: 60, overtime: 0 },
-    { d: 3, in: "09:10", out: "17:45", break: 60, overtime: 0 },
-    { d: 6, in: "09:00", out: "19:00", break: 60, overtime: 60 },
-    { d: 7, in: "08:48", out: "18:10", break: 60, overtime: 0 },
-    { d: 8, in: "09:05", out: "18:25", break: 60, overtime: 0 },
-    { d: 9, in: "09:15", out: "18:00", break: 60, overtime: 0 },
-    { d: 10, in: "08:58", out: "17:55", break: 60, overtime: 0 },
-    { d: 13, in: "09:03", out: "18:40", break: 60, overtime: 30 },
-    { d: 14, in: "09:00", out: "18:20", break: 60, overtime: 0 },
-    { d: 15, in: "09:12", out: "19:10", break: 60, overtime: 90 },
-    { d: 16, in: "08:50", out: "18:05", break: 60, overtime: 0 },
-    { d: 17, in: "09:08", out: "17:50", break: 60, overtime: 0 },
-  ];
-
-  const records: Records = {};
-  seed.forEach(({ d, in: inT, out, break: brk, overtime }) => {
-    if (d < today.getDate()) {
-      records[`${y}-${pad(m)}-${pad(d)}`] = {
-        in: inT,
-        out,
-        break: brk,
-        overtime,
-      };
-    }
-  });
-  return records;
-}
+import { apiFetch } from "./lib/api";
 
 type ToastState = { message: string; id: number };
 
-function MyPage({ user }: { user: AuthUser }) {
+// function MyPage() {
+function MyPage({ user }: { user: User }) {
   const router = useRouter();
   const today = new Date();
   const todayKey = dateKey(today);
 
-  const [records, setRecords] = useState<Records>(buildSeedRecords);
+  const [attendances, setAttendances] = useState<AttendanceRecords>({});
+  const [loading, setLoading] = useState(true);
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth()); // 0-indexed
   const [toast, setToast] = useState<ToastState | null>(null);
+
+  useEffect(() => {
+    const fetchAttendances = async () => {
+      setLoading(true);
+      try {
+        const res = await apiFetch(
+          `/attendances?year_month=${viewYear}-${String(viewMonth + 1).padStart(2, "0")}`,
+        );
+        if (!res.ok) throw new Error("取得失敗");
+        const data: AttendanceResponse[] = await res.json();
+
+        setAttendances(toRecords(data));
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAttendances();
+  }, [viewYear, viewMonth]);
 
   // トーストを表示する（2.5秒後に消える）
   const showToast = useCallback((message: string) => {
@@ -71,45 +52,45 @@ function MyPage({ user }: { user: AuthUser }) {
   }, []);
 
   // 打刻処理
-  const punch = useCallback(
-    (type: "in" | "out") => {
-      const now = new Date();
-      const t = fmtTime(now);
+  // const punch = useCallback(
+  //   (type: "in" | "out") => {
+  //     const now = new Date();
+  //     const t = fmtTime(now);
 
-      setRecords((prev) => {
-        const dayRecord = prev[todayKey] ?? {};
+  //     setRecords((prev) => {
+  //       const dayRecord = prev[todayKey] ?? {};
 
-        if (type === "in") {
-          if (dayRecord.in) {
-            showToast("出勤打刻済みです");
-            return prev;
-          }
-          showToast(`出勤打刻: ${t}`);
-          return { ...prev, [todayKey]: { ...dayRecord, in: t } };
-        } else {
-          if (!dayRecord.in) {
-            showToast("先に出勤打刻をしてください");
-            return prev;
-          }
-          if (dayRecord.out) {
-            showToast("退勤打刻済みです");
-            return prev;
-          }
-          showToast(`退勤打刻: ${t}`);
-          return { ...prev, [todayKey]: { ...dayRecord, out: t } };
-        }
-      });
-    },
-    [todayKey, showToast],
-  );
+  //       if (type === "in") {
+  //         if (dayRecord.in) {
+  //           showToast("出勤打刻済みです");
+  //           return prev;
+  //         }
+  //         showToast(`出勤打刻: ${t}`);
+  //         return { ...prev, [todayKey]: { ...dayRecord, in: t } };
+  //       } else {
+  //         if (!dayRecord.in) {
+  //           showToast("先に出勤打刻をしてください");
+  //           return prev;
+  //         }
+  //         if (dayRecord.out) {
+  //           showToast("退勤打刻済みです");
+  //           return prev;
+  //         }
+  //         showToast(`退勤打刻: ${t}`);
+  //         return { ...prev, [todayKey]: { ...dayRecord, out: t } };
+  //       }
+  //     });
+  //   },
+  //   [todayKey, showToast],
+  // );
 
   const handleLogout = () => {
     sessionStorage.removeItem("authUser");
     router.push("/login");
   };
 
-  const todayRecord = records[todayKey];
-  const isWorking = !!todayRecord?.in && !todayRecord?.out;
+  // const todayRecord = attendances![todayKey];
+  // const isWorking = !!todayRecord?.in && !todayRecord?.out;
 
   // カレンダーの月移動
   const prevMonth = () => {
@@ -167,7 +148,7 @@ function MyPage({ user }: { user: AuthUser }) {
               flexShrink: 0,
             }}
           >
-            {/* {user.name.slice(0, 2)} */}
+            {user.name}
           </div>
           <div>
             <div
@@ -177,10 +158,10 @@ function MyPage({ user }: { user: AuthUser }) {
                 color: "var(--text-primary)",
               }}
             >
-              {/* {user.name} */}
+              {user.name}
             </div>
             <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
-              {/* {user.department} · 社員ID: {user.employeeId} */}
+              社員ID: {user.id}
             </div>
           </div>
           <button
@@ -200,7 +181,7 @@ function MyPage({ user }: { user: AuthUser }) {
         </div>
 
         {/* ステータスバー */}
-        <div
+        {/* <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -241,10 +222,10 @@ function MyPage({ user }: { user: AuthUser }) {
               {todayRecord.out ? ` - ${todayRecord.out}` : ""}
             </span>
           )}
-        </div>
+        </div> */}
 
         {/* 打刻ボタン */}
-        <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+        {/* <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
           <PunchButton
             label="出勤時刻"
             time={todayRecord?.in}
@@ -257,10 +238,10 @@ function MyPage({ user }: { user: AuthUser }) {
             variant="out"
             onClick={() => punch("out")}
           />
-        </div>
+        </div> */}
 
         {/* サマリー */}
-        <div
+        {/* <div
           style={{
             fontSize: 12,
             fontWeight: 500,
@@ -277,7 +258,7 @@ function MyPage({ user }: { user: AuthUser }) {
             year={today.getFullYear()}
             month={today.getMonth()}
           />
-        </div>
+        </div> */}
 
         {/* カレンダー */}
         <div
@@ -294,7 +275,7 @@ function MyPage({ user }: { user: AuthUser }) {
         <Calendar
           year={viewYear}
           month={viewMonth}
-          records={records}
+          attendanceRecords={attendances}
           today={today}
           onPrev={prevMonth}
           onNext={nextMonth}
