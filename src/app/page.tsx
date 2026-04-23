@@ -167,7 +167,7 @@ function MyPage({ user }: { user: AuthUser }) {
               flexShrink: 0,
             }}
           >
-            {user.name.slice(0, 2)}
+            {/* {user.name.slice(0, 2)} */}
           </div>
           <div>
             <div
@@ -177,10 +177,10 @@ function MyPage({ user }: { user: AuthUser }) {
                 color: "var(--text-primary)",
               }}
             >
-              {user.name}
+              {/* {user.name} */}
             </div>
             <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
-              {user.department} · 社員ID: {user.employeeId}
+              {/* {user.department} · 社員ID: {user.employeeId} */}
             </div>
           </div>
           <button
