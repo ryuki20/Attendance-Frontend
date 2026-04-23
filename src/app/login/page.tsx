@@ -32,8 +32,8 @@ export default function LoginPage() {
       sessionStorage.setItem("authUser", JSON.stringify(data.user));
 
       router.push("/");
-      // } catch (e) {
-      //   setError("通信エラーが発生しました");
+    } catch (e) {
+      setError("通信エラーが発生しました");
     } finally {
       setLoading(false);
     }

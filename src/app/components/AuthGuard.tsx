@@ -13,7 +13,9 @@ export function AuthGuard({ children }: Props) {
 
   useEffect(() => {
     const stored = sessionStorage.getItem("authUser");
-    if (!stored) {
+    const token = sessionStorage.getItem("token");
+
+    if (!stored || token) {
       router.push("/login");
       return;
     }
