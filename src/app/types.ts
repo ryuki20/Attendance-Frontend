@@ -5,16 +5,18 @@ export type PunchRecord = {
   overtime?: number; // 残業時間（分）例: 30
 };
 
-export type Records = Record<string, PunchRecord>;
-
-export type User = {
+export interface Records {
+  [key: string]: PunchRecord;
+}
+export interface AuthUser {
+  token: string;
+  user: User;
+}
+export interface User {
+  id: string;
+  email: string;
   name: string;
-  department: string;
-  employeeId: string;
-};
-
-export type AuthUser = {
-  employeeId: string;
-  name: string;
-  department: string;
-};
+  role: string;
+  created_at: string;
+  updated_at: string;
+}

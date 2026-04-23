@@ -3,38 +3,51 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { findUser } from "../data/users";
 import type { AuthUser } from "../types";
+import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [employeeId, setEmployeeId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    const user = findUser(employeeId, password);
-    if (!user) {
-      setError("社員IDまたはパスワードが正しくありません");
-      return;
+  const handleLogin = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:8080/api/v1/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        setError("社員IDまたはパスワードが正しくありません");
+        return;
+      }
+
+      const data: AuthUser = await response.json();
+
+      sessionStorage.setItem("token", data.token);
+      sessionStorage.setItem("authUser", JSON.stringify(data.user));
+
+      router.push("/");
+      // } catch (e) {
+      //   setError("通信エラーが発生しました");
+    } finally {
+      setLoading(false);
     }
-
-    const authUser: AuthUser = {
-      employeeId: user.employeeId,
-      name: user.name,
-      department: user.department,
-    };
-    sessionStorage.setItem("authUser", JSON.stringify(authUser));
-    router.push("/");
   };
 
   return (
     <div>
       <h1>ログイン</h1>
       {error && <p>{error}</p>}
-      <label>社員ID</label>
+      <label>メールアドレス</label>
       <input
         type="text"
-        value={employeeId}
-        onChange={(e) => setEmployeeId(e.target.value)}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
       />
       <label>パスワード</label>
       <input
@@ -42,7 +55,9 @@ export default function LoginPage() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      <button onClick={handleLogin}>ログイン</button>
+      <button onClick={handleLogin} disabled={loading}>
+        {loading ? "ログイン中..." : "ログイン"}
+      </button>
     </div>
   );
 }
