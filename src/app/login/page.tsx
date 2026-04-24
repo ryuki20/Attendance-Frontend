@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { AuthUser } from "../types";
+import type { AuthEmployee } from "../types";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,10 +24,11 @@ export default function LoginPage() {
         return;
       }
 
-      const data: AuthUser = await response.json();
+      const data: AuthEmployee = await response.json();
+      console.log("APIレスポンス:", data);
 
       sessionStorage.setItem("token", data.token);
-      sessionStorage.setItem("authUser", JSON.stringify(data.user));
+      sessionStorage.setItem("AuthEmployee", JSON.stringify(data.user));
 
       router.push("/");
     } catch (e) {

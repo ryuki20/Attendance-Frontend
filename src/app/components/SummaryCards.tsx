@@ -1,9 +1,9 @@
 import React from "react";
-import type { Records } from "../types";
+import type { AttendanceRecords } from "../types";
 import { calcHours, parseKey } from "../utils";
 
 type Props = {
-  records: Records;
+  records: AttendanceRecords;
   year: number;
   month: number; // 0-indexed
 };
@@ -14,7 +14,11 @@ type Summary = {
   avgOut: string;
 };
 
-function calcSummary(records: Records, year: number, month: number): Summary {
+function calcSummary(
+  records: AttendanceRecords,
+  year: number,
+  month: number,
+): Summary {
   let days = 0;
   let totalHours = 0;
   const outHours: number[] = [];

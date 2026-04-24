@@ -1,7 +1,7 @@
 "use client";
 import { useState, useCallback, useEffect } from "react";
-import { AttendanceRecords, AttendanceResponse, User } from "./types";
-import { dateKey, fmtTime, toRecords } from "./utils";
+import { AttendanceRecords, AttendanceResponse, Employee } from "./types";
+import { dateKey, toRecords, isoToHHMM } from "./utils";
 import { PunchButton } from "./components/PunchButton";
 import { Calendar } from "./components/Calendar";
 import { SummaryCards } from "./components/SummaryCards";
@@ -12,7 +12,7 @@ import { apiFetch } from "./lib/api";
 type ToastState = { message: string; id: number };
 
 // function MyPage() {
-function MyPage({ user }: { user: User }) {
+function MyPage({ user }: { user: Employee }) {
   const router = useRouter();
   const today = new Date();
   const todayKey = dateKey(today);
@@ -52,45 +52,52 @@ function MyPage({ user }: { user: User }) {
   }, []);
 
   // 打刻処理
-  // const punch = useCallback(
-  //   (type: "in" | "out") => {
-  //     const now = new Date();
-  //     const t = fmtTime(now);
+  const punch = useCallback(
+    async (type: "in" | "out") => {
+      const date = todayKey;
+      const endpoint =
+        type === "in" ? "/attendances/clock-in" : "/attendances/clock-out";
 
-  //     setRecords((prev) => {
-  //       const dayRecord = prev[todayKey] ?? {};
+      try {
+        const res = await apiFetch(endpoint, {
+          method: "POST",
+          body: JSON.stringify({ date }),
+        });
 
-  //       if (type === "in") {
-  //         if (dayRecord.in) {
-  //           showToast("出勤打刻済みです");
-  //           return prev;
-  //         }
-  //         showToast(`出勤打刻: ${t}`);
-  //         return { ...prev, [todayKey]: { ...dayRecord, in: t } };
-  //       } else {
-  //         if (!dayRecord.in) {
-  //           showToast("先に出勤打刻をしてください");
-  //           return prev;
-  //         }
-  //         if (dayRecord.out) {
-  //           showToast("退勤打刻済みです");
-  //           return prev;
-  //         }
-  //         showToast(`退勤打刻: ${t}`);
-  //         return { ...prev, [todayKey]: { ...dayRecord, out: t } };
-  //       }
-  //     });
-  //   },
-  //   [todayKey, showToast],
-  // );
+        if (!res.ok) {
+          showToast("打刻に失敗しました");
+          return;
+        }
+
+        const data: AttendanceResponse = await res.json();
+
+        setAttendances((prev) => ({
+          ...prev,
+          [data.date]: {
+            in: isoToHHMM(data.clock_in),
+            out: isoToHHMM(data.clock_out),
+          },
+        }));
+
+        if (type === "in") {
+          showToast(`出勤打刻: ${isoToHHMM(data.clock_in)}`);
+        } else {
+          showToast(`退勤打刻: ${isoToHHMM(data.clock_out)}`);
+        }
+      } catch (e) {
+        showToast("通信エラーが発生しました");
+      }
+    },
+    [todayKey, showToast],
+  );
 
   const handleLogout = () => {
     sessionStorage.removeItem("authUser");
     router.push("/login");
   };
 
-  // const todayRecord = attendances![todayKey];
-  // const isWorking = !!todayRecord?.in && !todayRecord?.out;
+  const todayRecord = attendances![todayKey];
+  const isWorking = !!todayRecord?.in && !todayRecord?.out;
 
   // カレンダーの月移動
   const prevMonth = () => {
@@ -148,7 +155,7 @@ function MyPage({ user }: { user: User }) {
               flexShrink: 0,
             }}
           >
-            {user.name}
+            {user.name.slice(0, 2)}
           </div>
           <div>
             <div
@@ -181,7 +188,7 @@ function MyPage({ user }: { user: User }) {
         </div>
 
         {/* ステータスバー */}
-        {/* <div
+        <div
           style={{
             display: "flex",
             alignItems: "center",
@@ -222,10 +229,10 @@ function MyPage({ user }: { user: User }) {
               {todayRecord.out ? ` - ${todayRecord.out}` : ""}
             </span>
           )}
-        </div> */}
+        </div>
 
         {/* 打刻ボタン */}
-        {/* <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
+        <div style={{ display: "flex", gap: 12, marginBottom: 24 }}>
           <PunchButton
             label="出勤時刻"
             time={todayRecord?.in}
@@ -238,10 +245,10 @@ function MyPage({ user }: { user: User }) {
             variant="out"
             onClick={() => punch("out")}
           />
-        </div> */}
+        </div>
 
         {/* サマリー */}
-        {/* <div
+        <div
           style={{
             fontSize: 12,
             fontWeight: 500,
@@ -254,11 +261,11 @@ function MyPage({ user }: { user: User }) {
         </div>
         <div style={{ marginBottom: 24 }}>
           <SummaryCards
-            records={records}
+            records={attendances}
             year={today.getFullYear()}
             month={today.getMonth()}
           />
-        </div> */}
+        </div>
 
         {/* カレンダー */}
         <div

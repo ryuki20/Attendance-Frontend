@@ -1,4 +1,4 @@
-import { AttendanceRecords, AttendanceResponse } from "./types";
+import { AttendanceRecords, AttendanceResponse, Employee } from "./types";
 
 export function dateKey(d: Date): string {
   return [
@@ -63,3 +63,8 @@ export function toRecords(
   });
   return records;
 }
+
+export type AuthEmployee = {
+  token: string;
+  user: Employee;
+};

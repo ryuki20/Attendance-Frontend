@@ -1,6 +1,6 @@
 export type AttendanceResponse = {
   id: string;
-  user_id: string;
+  employee_id: string;
   clock_in?: string | null; // "2024-01-01T09:00:00+09:00"
   clock_out?: string | null; // "2024-01-01T09:00:00+09:00"
   date: string;
@@ -8,11 +8,11 @@ export type AttendanceResponse = {
   updated_at: string;
 };
 
-export type AuthUser = {
+export type AuthEmployee = {
   token: string;
-  user: User;
+  user: Employee;
 };
-export type User = {
+export type Employee = {
   id: string;
   email: string;
   name: string;
