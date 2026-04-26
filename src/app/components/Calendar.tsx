@@ -1,6 +1,6 @@
 import React from "react";
 import type { AttendanceRecords } from "../types";
-import { dateKey, fmtMinutes } from "../utils";
+import { dateKey } from "../utils";
 
 type Props = {
   year: number;

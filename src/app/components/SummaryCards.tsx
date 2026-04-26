@@ -1,6 +1,6 @@
 import React from "react";
 import type { AttendanceRecords } from "../types";
-import { calcHours, parseKey } from "../utils";
+import { calcMinutes, fmtMinutes, parseKey } from "../utils";
 
 type Props = {
   records: AttendanceRecords;
@@ -10,17 +10,17 @@ type Props = {
 
 type Summary = {
   days: number;
-  totalHours: number;
+  totalMinutes: number;
   avgOut: string;
 };
 
 function calcSummary(
   records: AttendanceRecords,
   year: number,
-  month: number,
+  month: number
 ): Summary {
   let days = 0;
-  let totalHours = 0;
+  let totalMinutes = 0;
   const outHours: number[] = [];
 
   Object.entries(records).forEach(([key, record]) => {
@@ -30,7 +30,7 @@ function calcSummary(
     if (record.in) days++;
 
     if (record.in && record.out) {
-      totalHours += calcHours(record.in, record.out);
+      totalMinutes += calcMinutes(record.in, record.out);
       outHours.push(parseInt(record.out.split(":")[0]));
     }
   });
@@ -40,18 +40,18 @@ function calcSummary(
       ? `${Math.round(outHours.reduce((a, b) => a + b, 0) / outHours.length)}時`
       : "--";
 
-  return { days, totalHours: Math.round(totalHours * 10) / 10, avgOut };
+  return { days, totalMinutes, avgOut };
 }
 
 export const SummaryCards: React.FC<Props> = ({ records, year, month }) => {
-  const { days, totalHours, avgOut } = calcSummary(records, year, month);
+  const { days, totalMinutes, avgOut } = calcSummary(records, year, month);
 
   return (
     <div
       style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}
     >
       <MetricCard label="出勤日数" value={String(days)} unit="日" />
-      <MetricCard label="総労働時間" value={String(totalHours)} unit="時間" />
+      <MetricCard label="総労働時間" value={fmtMinutes(totalMinutes)} unit="" />
       <MetricCard label="平均退勤" value={avgOut} unit="" />
     </div>
   );

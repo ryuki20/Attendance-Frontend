@@ -1,18 +1,17 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
-import { AttendanceRecords, AttendanceResponse, Employee } from "./types";
-import { dateKey, toRecords, isoToHHMM } from "./utils";
-import { PunchButton } from "./components/PunchButton";
-import { Calendar } from "./components/Calendar";
-import { SummaryCards } from "./components/SummaryCards";
-import { AuthGuard } from "./components/AuthGuard";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { AuthGuard } from "./components/AuthGuard";
+import { Calendar } from "./components/Calendar";
+import { PunchButton } from "./components/PunchButton";
+import { SummaryCards } from "./components/SummaryCards";
 import { apiFetch } from "./lib/api";
+import { AttendanceRecords, AttendanceResponse, Employee } from "./types";
+import { dateKey, isoToHHMM, toRecords } from "./utils";
 
 type ToastState = { message: string; id: number };
 
-// function MyPage() {
-function MyPage({ user }: { user: Employee }) {
+function MyPage({ employee }: { employee: Employee }) {
   const router = useRouter();
   const today = new Date();
   const todayKey = dateKey(today);
@@ -28,7 +27,7 @@ function MyPage({ user }: { user: Employee }) {
       setLoading(true);
       try {
         const res = await apiFetch(
-          `/attendances?year_month=${viewYear}-${String(viewMonth + 1).padStart(2, "0")}`,
+          `/attendances?year_month=${viewYear}-${String(viewMonth + 1).padStart(2, "0")}`
         );
         if (!res.ok) throw new Error("取得失敗");
         const data: AttendanceResponse[] = await res.json();
@@ -52,44 +51,41 @@ function MyPage({ user }: { user: Employee }) {
   }, []);
 
   // 打刻処理
-  const punch = useCallback(
-    async (type: "in" | "out") => {
-      const date = todayKey;
-      const endpoint =
-        type === "in" ? "/attendances/clock-in" : "/attendances/clock-out";
+  const punch = async (type: "in" | "out") => {
+    const date = todayKey;
+    const endpoint =
+      type === "in" ? "/attendances/clock-in" : "/attendances/clock-out";
 
-      try {
-        const res = await apiFetch(endpoint, {
-          method: "POST",
-          body: JSON.stringify({ date }),
-        });
+    try {
+      const res = await apiFetch(endpoint, {
+        method: "POST",
+        body: JSON.stringify({ date }),
+      });
 
-        if (!res.ok) {
-          showToast("打刻に失敗しました");
-          return;
-        }
-
-        const data: AttendanceResponse = await res.json();
-
-        setAttendances((prev) => ({
-          ...prev,
-          [data.date]: {
-            in: isoToHHMM(data.clock_in),
-            out: isoToHHMM(data.clock_out),
-          },
-        }));
-
-        if (type === "in") {
-          showToast(`出勤打刻: ${isoToHHMM(data.clock_in)}`);
-        } else {
-          showToast(`退勤打刻: ${isoToHHMM(data.clock_out)}`);
-        }
-      } catch (e) {
-        showToast("通信エラーが発生しました");
+      if (!res.ok) {
+        showToast("打刻に失敗しました");
+        return;
       }
-    },
-    [todayKey, showToast],
-  );
+
+      const data: AttendanceResponse = await res.json();
+
+      setAttendances((prev) => ({
+        ...prev,
+        [data.date]: {
+          in: isoToHHMM(data.clock_in),
+          out: isoToHHMM(data.clock_out),
+        },
+      }));
+
+      if (type === "in") {
+        showToast(`出勤打刻: ${isoToHHMM(data.clock_in)}`);
+      } else {
+        showToast(`退勤打刻: ${isoToHHMM(data.clock_out)}`);
+      }
+    } catch (e) {
+      showToast("通信エラーが発生しました");
+    }
+  };
 
   const handleLogout = () => {
     sessionStorage.removeItem("authUser");
@@ -155,7 +151,7 @@ function MyPage({ user }: { user: Employee }) {
               flexShrink: 0,
             }}
           >
-            {user.name.slice(0, 2)}
+            {employee.name.slice(0, 2)}
           </div>
           <div>
             <div
@@ -165,10 +161,10 @@ function MyPage({ user }: { user: Employee }) {
                 color: "var(--text-primary)",
               }}
             >
-              {user.name}
+              {employee.name}
             </div>
             <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
-              社員ID: {user.id}
+              社員ID: {employee.id}
             </div>
           </div>
           <button
@@ -247,46 +243,63 @@ function MyPage({ user }: { user: Employee }) {
           />
         </div>
 
-        {/* サマリー */}
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 500,
-            color: "var(--text-muted)",
-            marginBottom: 10,
-            letterSpacing: "0.04em",
-          }}
-        >
-          今月のサマリー
-        </div>
-        <div style={{ marginBottom: 24 }}>
-          <SummaryCards
-            records={attendances}
-            year={today.getFullYear()}
-            month={today.getMonth()}
-          />
-        </div>
+        {loading ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "48px 0",
+              color: "var(--text-muted)",
+              fontSize: 13,
+            }}
+          >
+            読み込み中...
+          </div>
+        ) : (
+          <>
+            {/* サマリー */}
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                color: "var(--text-muted)",
+                marginBottom: 10,
+                letterSpacing: "0.04em",
+              }}
+            >
+              今月のサマリー
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <SummaryCards
+                records={attendances}
+                year={today.getFullYear()}
+                month={today.getMonth()}
+              />
+            </div>
 
-        {/* カレンダー */}
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 500,
-            color: "var(--text-muted)",
-            marginBottom: 10,
-            letterSpacing: "0.04em",
-          }}
-        >
-          勤務 日別データ
-        </div>
-        <Calendar
-          year={viewYear}
-          month={viewMonth}
-          attendanceRecords={attendances}
-          today={today}
-          onPrev={prevMonth}
-          onNext={nextMonth}
-        />
+            {/* カレンダー */}
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                color: "var(--text-muted)",
+                marginBottom: 10,
+                letterSpacing: "0.04em",
+              }}
+            >
+              勤務 日別データ
+            </div>
+            <Calendar
+              year={viewYear}
+              month={viewMonth}
+              attendanceRecords={attendances}
+              today={today}
+              onPrev={prevMonth}
+              onNext={nextMonth}
+            />
+          </>
+        )}
       </div>
 
       {/* トースト通知 */}
@@ -352,5 +365,5 @@ function MyPage({ user }: { user: Employee }) {
 }
 
 export default function App() {
-  return <AuthGuard>{(user) => <MyPage user={user} />}</AuthGuard>;
+  return <AuthGuard>{(employee) => <MyPage employee={employee} />}</AuthGuard>;
 }
