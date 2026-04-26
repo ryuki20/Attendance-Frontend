@@ -1,18 +1,18 @@
 "use client";
-import { useState, useCallback, useEffect } from "react";
-import { AttendanceRecords, AttendanceResponse, Employee } from "./types";
-import { dateKey, toRecords, isoToHHMM } from "./utils";
-import { PunchButton } from "./components/PunchButton";
-import { Calendar } from "./components/Calendar";
-import { SummaryCards } from "./components/SummaryCards";
-import { AuthGuard } from "./components/AuthGuard";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { AuthGuard } from "./components/AuthGuard";
+import { Calendar } from "./components/Calendar";
+import { PunchButton } from "./components/PunchButton";
+import { SummaryCards } from "./components/SummaryCards";
 import { apiFetch } from "./lib/api";
+import { AttendanceRecords, AttendanceResponse, Employee } from "./types";
+import { dateKey, isoToHHMM, toRecords } from "./utils";
 
 type ToastState = { message: string; id: number };
 
 // function MyPage() {
-function MyPage({ user }: { user: Employee }) {
+function MyPage({ employee }: { employee: Employee }) {
   const router = useRouter();
   const today = new Date();
   const todayKey = dateKey(today);
@@ -28,7 +28,7 @@ function MyPage({ user }: { user: Employee }) {
       setLoading(true);
       try {
         const res = await apiFetch(
-          `/attendances?year_month=${viewYear}-${String(viewMonth + 1).padStart(2, "0")}`,
+          `/attendances?year_month=${viewYear}-${String(viewMonth + 1).padStart(2, "0")}`
         );
         if (!res.ok) throw new Error("取得失敗");
         const data: AttendanceResponse[] = await res.json();
@@ -88,7 +88,7 @@ function MyPage({ user }: { user: Employee }) {
         showToast("通信エラーが発生しました");
       }
     },
-    [todayKey, showToast],
+    [todayKey, showToast]
   );
 
   const handleLogout = () => {
@@ -155,7 +155,7 @@ function MyPage({ user }: { user: Employee }) {
               flexShrink: 0,
             }}
           >
-            {user.name.slice(0, 2)}
+            {employee.name.slice(0, 2)}
           </div>
           <div>
             <div
@@ -165,10 +165,10 @@ function MyPage({ user }: { user: Employee }) {
                 color: "var(--text-primary)",
               }}
             >
-              {user.name}
+              {employee.name}
             </div>
             <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
-              社員ID: {user.id}
+              社員ID: {employee.id}
             </div>
           </div>
           <button
@@ -352,5 +352,5 @@ function MyPage({ user }: { user: Employee }) {
 }
 
 export default function App() {
-  return <AuthGuard>{(user) => <MyPage user={user} />}</AuthGuard>;
+  return <AuthGuard>{(employee) => <MyPage employee={employee} />}</AuthGuard>;
 }

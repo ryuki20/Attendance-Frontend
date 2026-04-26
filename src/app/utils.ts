@@ -52,7 +52,7 @@ export function isoToHHMM(iso: string | null | undefined): string | undefined {
 }
 
 export function toRecords(
-  attendances: AttendanceResponse[],
+  attendances: AttendanceResponse[]
 ): AttendanceRecords {
   const records: AttendanceRecords = {};
   attendances.forEach((a) => {
@@ -66,5 +66,5 @@ export function toRecords(
 
 export type AuthEmployee = {
   token: string;
-  user: Employee;
+  employee: Employee;
 };
