@@ -1,4 +1,4 @@
-import { AttendanceRecords, AttendanceResponse, Employee } from "./types";
+import { AttendanceRecords, AttendanceResponse } from "./types";
 
 export function dateKey(d: Date): string {
   return [
@@ -15,10 +15,10 @@ export function fmtTime(d: Date): string {
   ].join(":");
 }
 
-export function calcHours(inT: string, outT: string): number {
+export function calcMinutes(inT: string, outT: string): number {
   const [ih, im] = inT.split(":").map(Number);
   const [oh, om] = outT.split(":").map(Number);
-  return (oh * 60 + om - (ih * 60 + im)) / 60;
+  return oh * 60 + om - (ih * 60 + im);
 }
 
 export function parseKey(key: string): {
@@ -26,7 +26,7 @@ export function parseKey(key: string): {
   month: number;
   day: number;
 } {
-  const [year, month, day] = key.split("_").map(Number);
+  const [year, month, day] = key.split("-").map(Number);
   return { year, month: month - 1, day };
 }
 
@@ -63,8 +63,3 @@ export function toRecords(
   });
   return records;
 }
-
-export type AuthEmployee = {
-  token: string;
-  employee: Employee;
-};
