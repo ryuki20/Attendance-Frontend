@@ -11,7 +11,6 @@ import { dateKey, isoToHHMM, toRecords } from "./utils";
 
 type ToastState = { message: string; id: number };
 
-// function MyPage() {
 function MyPage({ employee }: { employee: Employee }) {
   const router = useRouter();
   const today = new Date();
@@ -52,44 +51,41 @@ function MyPage({ employee }: { employee: Employee }) {
   }, []);
 
   // 打刻処理
-  const punch = useCallback(
-    async (type: "in" | "out") => {
-      const date = todayKey;
-      const endpoint =
-        type === "in" ? "/attendances/clock-in" : "/attendances/clock-out";
+  const punch = async (type: "in" | "out") => {
+    const date = todayKey;
+    const endpoint =
+      type === "in" ? "/attendances/clock-in" : "/attendances/clock-out";
 
-      try {
-        const res = await apiFetch(endpoint, {
-          method: "POST",
-          body: JSON.stringify({ date }),
-        });
+    try {
+      const res = await apiFetch(endpoint, {
+        method: "POST",
+        body: JSON.stringify({ date }),
+      });
 
-        if (!res.ok) {
-          showToast("打刻に失敗しました");
-          return;
-        }
-
-        const data: AttendanceResponse = await res.json();
-
-        setAttendances((prev) => ({
-          ...prev,
-          [data.date]: {
-            in: isoToHHMM(data.clock_in),
-            out: isoToHHMM(data.clock_out),
-          },
-        }));
-
-        if (type === "in") {
-          showToast(`出勤打刻: ${isoToHHMM(data.clock_in)}`);
-        } else {
-          showToast(`退勤打刻: ${isoToHHMM(data.clock_out)}`);
-        }
-      } catch (e) {
-        showToast("通信エラーが発生しました");
+      if (!res.ok) {
+        showToast("打刻に失敗しました");
+        return;
       }
-    },
-    [todayKey, showToast]
-  );
+
+      const data: AttendanceResponse = await res.json();
+
+      setAttendances((prev) => ({
+        ...prev,
+        [data.date]: {
+          in: isoToHHMM(data.clock_in),
+          out: isoToHHMM(data.clock_out),
+        },
+      }));
+
+      if (type === "in") {
+        showToast(`出勤打刻: ${isoToHHMM(data.clock_in)}`);
+      } else {
+        showToast(`退勤打刻: ${isoToHHMM(data.clock_out)}`);
+      }
+    } catch (e) {
+      showToast("通信エラーが発生しました");
+    }
+  };
 
   const handleLogout = () => {
     sessionStorage.removeItem("authUser");
@@ -247,46 +243,63 @@ function MyPage({ employee }: { employee: Employee }) {
           />
         </div>
 
-        {/* サマリー */}
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 500,
-            color: "var(--text-muted)",
-            marginBottom: 10,
-            letterSpacing: "0.04em",
-          }}
-        >
-          今月のサマリー
-        </div>
-        <div style={{ marginBottom: 24 }}>
-          <SummaryCards
-            records={attendances}
-            year={today.getFullYear()}
-            month={today.getMonth()}
-          />
-        </div>
+        {loading ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "48px 0",
+              color: "var(--text-muted)",
+              fontSize: 13,
+            }}
+          >
+            読み込み中...
+          </div>
+        ) : (
+          <>
+            {/* サマリー */}
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                color: "var(--text-muted)",
+                marginBottom: 10,
+                letterSpacing: "0.04em",
+              }}
+            >
+              今月のサマリー
+            </div>
+            <div style={{ marginBottom: 24 }}>
+              <SummaryCards
+                records={attendances}
+                year={today.getFullYear()}
+                month={today.getMonth()}
+              />
+            </div>
 
-        {/* カレンダー */}
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 500,
-            color: "var(--text-muted)",
-            marginBottom: 10,
-            letterSpacing: "0.04em",
-          }}
-        >
-          勤務 日別データ
-        </div>
-        <Calendar
-          year={viewYear}
-          month={viewMonth}
-          attendanceRecords={attendances}
-          today={today}
-          onPrev={prevMonth}
-          onNext={nextMonth}
-        />
+            {/* カレンダー */}
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 500,
+                color: "var(--text-muted)",
+                marginBottom: 10,
+                letterSpacing: "0.04em",
+              }}
+            >
+              勤務 日別データ
+            </div>
+            <Calendar
+              year={viewYear}
+              month={viewMonth}
+              attendanceRecords={attendances}
+              today={today}
+              onPrev={prevMonth}
+              onNext={nextMonth}
+            />
+          </>
+        )}
       </div>
 
       {/* トースト通知 */}
