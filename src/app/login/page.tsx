@@ -28,7 +28,13 @@ export default function LoginPage() {
       console.log("APIレスポンス:", data);
 
       sessionStorage.setItem("token", data.token);
-      sessionStorage.setItem("AuthEmployee", JSON.stringify(data.user));
+      sessionStorage.setItem("AuthEmployee", JSON.stringify(data.employee));
+
+      if (data.employee.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/");
+      }
 
       router.push("/");
     } catch (e) {

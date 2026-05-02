@@ -167,20 +167,39 @@ function MyPage({ employee }: { employee: Employee }) {
               社員ID: {employee.id}
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            style={{
-              fontSize: 12,
-              color: "var(--text-muted)",
-              background: "transparent",
-              border: "0.5px solid var(--border)",
-              borderRadius: 8,
-              padding: "6px 12px",
-              cursor: "pointer",
-            }}
-          >
-            ログアウト
-          </button>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+            {/* 管理者のみ表示 */}
+            {employee.role === "admin" && (
+              <button
+                onClick={() => router.push("/admin")}
+                style={{
+                  fontSize: 12,
+                  color: "var(--blue)",
+                  background: "transparent",
+                  border: "0.5px solid var(--blue)",
+                  borderRadius: 8,
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                }}
+              >
+                管理者ページ
+              </button>
+            )}
+            <button
+              onClick={handleLogout}
+              style={{
+                fontSize: 12,
+                color: "var(--text-muted)",
+                background: "transparent",
+                border: "0.5px solid var(--border)",
+                borderRadius: 8,
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              ログアウト
+            </button>
+          </div>
         </div>
 
         {/* ステータスバー */}
