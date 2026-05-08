@@ -30,7 +30,7 @@ function EmployeeDetail({ employee }: { employee: Employee }) {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const res = await apiFetch(`/employees/${id}`);
+        const res = await apiFetch(`/admin/employees/${id}`);
         if (!res.ok) throw new Error("取得失敗");
         const data: EmployeeDetailResponse = await res.json();
         setDetail(data);
@@ -48,7 +48,7 @@ function EmployeeDetail({ employee }: { employee: Employee }) {
 
   const handleSave = async () => {
     try {
-      const res = await apiFetch(`/employees/${id}`, {
+      const res = await apiFetch(`/admin/employees/${id}`, {
         method: "PUT",
         body: JSON.stringify({ name, email, role }),
       });
