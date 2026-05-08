@@ -28,29 +28,6 @@ export type AttendanceRecord = {
 
 export type AttendanceRecords = Record<string, AttendanceRecord>; // キー: "2024-01-01"
 
-export type RequestType = "paid_leave" | "correction";
-
-export type RequestStatus = "pending" | "approved" | "rejected";
-
-export type AttendanceRequest = {
-  id: string;
-  employee_id: string;
-  type: RequestType;
-  status: RequestStatus;
-  date: string;
-  reason: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export type CorrectionDetail = {
-  request_id: string;
-  before_clock_in?: string;
-  before_clock_out?: string;
-  after_clock_in?: string;
-  after_clock_out?: string;
-};
-
 export type EmployeeListResponse = {
   employees: Employee[];
   total: number;
@@ -68,4 +45,41 @@ export type EmployeeDetailResponse = {
   attendances: {
     records: AttendanceResponse[];
   };
+};
+
+export type ApplicationType = "ATTENDANCE_CORRECTION";
+
+export type ApplicationStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export type ApplicationDetails = {
+  date: string;
+  requested_clock_in: string | null;
+  requested_clock_out: string | null;
+};
+
+export type Application = {
+  id: string;
+  employee: {
+    id: string;
+    name: string;
+  };
+  type: ApplicationType;
+  status: ApplicationStatus;
+  reason: string;
+  details: ApplicationDetails;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ApplicationDetail = Application & {
+  approved_by: { id: string; name: string } | null;
+  approved_at: string | null;
+  admin_comment: string | null;
+};
+
+export type ApplicationListResponse = {
+  applications: Application[];
+  total: number;
+  page: number;
+  per_page: number;
 };

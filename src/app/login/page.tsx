@@ -25,11 +25,10 @@ export default function LoginPage() {
       }
 
       const data: AuthEmployee = await response.json();
-      console.log("APIレスポンス:", data);
 
       sessionStorage.setItem("token", data.token);
       sessionStorage.setItem("AuthEmployee", JSON.stringify(data.employee));
-
+      console.log("テスト" + data);
       if (data.employee.role === "admin") {
         router.push("/admin");
       } else {
