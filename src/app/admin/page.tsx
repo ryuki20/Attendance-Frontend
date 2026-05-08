@@ -15,8 +15,9 @@ function EmployeeList({ employee }: { employee: Employee }) {
     const fetchEmployees = async () => {
       setLoading(true);
       try {
-        const res = await apiFetch("/employees");
+        const res = await apiFetch("/admin/employees");
         if (!res.ok) throw new Error("取得失敗");
+        console.log(res);
         const data: EmployeeListResponse = await res.json();
         setEmployees(data.employees);
         setTotal(data.total);

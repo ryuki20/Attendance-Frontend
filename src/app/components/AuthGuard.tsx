@@ -10,6 +10,7 @@ type Props = {
 export function AuthGuard({ children }: Props) {
   const router = useRouter();
   const [employee] = useState<Employee | null>(() => {
+    if (typeof window === "undefined") return null;
     const stored = sessionStorage.getItem("AuthEmployee");
     const token = sessionStorage.getItem("token");
 

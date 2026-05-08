@@ -60,22 +60,13 @@ export default function AdminLayout({ children }: Props) {
 
         <nav style={{ flex: 1, padding: "16px 12px" }}>
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive =
+              typeof window !== "undefined" && pathname === item.href;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                style={{
-                  display: "block",
-                  padding: "8px 12px",
-                  borderRadius: 8,
-                  fontSize: 13,
-                  color: isActive ? "var(--blue)" : "var(--text-muted)",
-                  background: isActive ? "rgba(24,95,165,0.08)" : "transparent",
-                  textDecoration: "none",
-                  marginBottom: 4,
-                  fontWeight: isActive ? 500 : 400,
-                }}
+                className={`nav-link${isActive ? " active" : ""}`}
               >
                 {item.label}
               </Link>
@@ -125,6 +116,22 @@ export default function AdminLayout({ children }: Props) {
         * { box-sizing: border-box; margin: 0; padding: 0; }
         a { color: inherit; }
         button { font-family: inherit; }
+        .nav-link {
+          display: block;
+          padding: 8px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          color: var(--text-muted);
+          background: transparent;
+          text-decoration: none;
+          margin-bottom: 4px;
+          font-weight: 400;
+        }
+        .nav-link.active {
+          color: var(--blue);
+          background: rgba(24,95,165,0.08);
+          font-weight: 500;
+        }
       `}</style>
     </div>
   );
