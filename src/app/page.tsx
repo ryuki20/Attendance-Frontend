@@ -88,7 +88,8 @@ function MyPage({ employee }: { employee: Employee }) {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("authUser");
+    sessionStorage.removeItem("AuthEmployee");
+    sessionStorage.removeItem("token");
     router.push("/login");
   };
 
@@ -183,6 +184,22 @@ function MyPage({ employee }: { employee: Employee }) {
                 }}
               >
                 管理者ページ
+              </button>
+            )}
+            {employee.role !== "admin" && (
+              <button
+                onClick={() => router.push("/applications")}
+                style={{
+                  fontSize: 12,
+                  color: "var(--text-muted)",
+                  background: "transparent",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: 8,
+                  padding: "6px 12px",
+                  cursor: "pointer",
+                }}
+              >
+                申請一覧
               </button>
             )}
             <button
@@ -316,6 +333,9 @@ function MyPage({ employee }: { employee: Employee }) {
               today={today}
               onPrev={prevMonth}
               onNext={nextMonth}
+              onApplyCorrection={(date) =>
+                router.push(`/applications/new?date=${date}`)
+              }
             />
           </>
         )}
