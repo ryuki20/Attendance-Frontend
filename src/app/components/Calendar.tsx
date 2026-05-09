@@ -9,6 +9,7 @@ type Props = {
   today: Date;
   onPrev: () => void;
   onNext: () => void;
+  onApplyCorrection: (date: string) => void;
 };
 
 const DOW = ["日", "月", "火", "水", "木", "金", "土"];
@@ -20,6 +21,7 @@ export const Calendar: React.FC<Props> = ({
   today,
   onPrev,
   onNext,
+  onApplyCorrection,
 }) => {
   const lastDate = new Date(year, month + 1, 0).getDate();
   const todayKey = dateKey(today);
@@ -85,6 +87,7 @@ export const Calendar: React.FC<Props> = ({
               <th style={{ ...thStyle, textAlign: "center" }}>曜日</th>
               <th style={{ ...thStyle, textAlign: "center" }}>出勤</th>
               <th style={{ ...thStyle, textAlign: "center" }}>退勤</th>
+              <th style={{ ...thStyle, textAlign: "center" }}>申請</th>
             </tr>
           </thead>
           <tbody>
@@ -194,6 +197,32 @@ export const Calendar: React.FC<Props> = ({
                         --
                       </span>
                     )}
+                  </td>
+                  {/* 申請ボタン */}
+                  <td style={{ ...tdBase, textAlign: "center" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 4,
+                        justifyContent: "center",
+                      }}
+                    >
+                      <button
+                        onClick={() => onApplyCorrection(key)}
+                        style={{
+                          fontSize: 10,
+                          padding: "3px 7px",
+                          borderRadius: 5,
+                          border: "0.5px solid var(--border)",
+                          background: "transparent",
+                          color: "var(--text-muted)",
+                          cursor: "pointer",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        打刻修正
+                      </button>
+                    </div>
                   </td>
                 </tr>
               );

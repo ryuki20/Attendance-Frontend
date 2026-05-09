@@ -47,7 +47,7 @@ export type EmployeeDetailResponse = {
   };
 };
 
-export type ApplicationType = "ATTENDANCE_CORRECTION";
+export type ApplicationType = "ATTENDANCE_CORRECTION" | "PAID_LEAVE";
 
 export type ApplicationStatus = "PENDING" | "APPROVED" | "REJECTED";
 
