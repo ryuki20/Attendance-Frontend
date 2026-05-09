@@ -1,21 +1,16 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React from "react";
+import { useAuth } from "../context/AuthContext";
 
 type Props = {
   children: React.ReactNode;
 };
 
 export default function AdminLayout({ children }: Props) {
-  const router = useRouter();
   const pathname = usePathname();
-
-  const handleLogout = () => {
-    sessionStorage.removeItem("AuthEmployee");
-    sessionStorage.removeItem("token");
-    router.push("/login");
-  };
+  const { logout } = useAuth();
 
   const navItems = [
     { label: "社員一覧", href: "/admin" },
@@ -60,8 +55,7 @@ export default function AdminLayout({ children }: Props) {
 
         <nav style={{ flex: 1, padding: "16px 12px" }}>
           {navItems.map((item) => {
-            const isActive =
-              typeof window !== "undefined" && pathname === item.href;
+            const isActive = pathname === item.href;
             return (
               <Link
                 key={item.href}
@@ -76,7 +70,7 @@ export default function AdminLayout({ children }: Props) {
 
         <div style={{ padding: "0 12px" }}>
           <button
-            onClick={handleLogout}
+            onClick={logout}
             style={{
               width: "100%",
               padding: "8px 12px",
