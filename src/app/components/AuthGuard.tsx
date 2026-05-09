@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
 import type { Employee } from "../types";
 
 type Props = {
@@ -9,25 +10,41 @@ type Props = {
 
 export function AuthGuard({ children }: Props) {
   const router = useRouter();
-  const [employee] = useState<Employee | null>(() => {
-    if (typeof window === "undefined") return null;
-    const stored = sessionStorage.getItem("AuthEmployee");
-    const token = sessionStorage.getItem("token");
-
-    if (!stored || !token) {
-      return null;
-    }
-
-    return JSON.parse(stored) as Employee;
-  });
+  const { employee, isHydrated } = useAuth();
 
   useEffect(() => {
+    if (!isHydrated) return;
     if (!employee) {
       router.push("/login");
     }
-  }, [employee, router]);
+  }, [employee, isHydrated, router]);
 
-  if (!employee) return null;
+  if (!isHydrated || !employee) return <Spinner />;
 
   return <>{children(employee)}</>;
+}
+
+function Spinner() {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+      }}
+    >
+      <div
+        style={{
+          width: 24,
+          height: 24,
+          border: "2px solid rgba(0,0,0,0.1)",
+          borderTopColor: "#185fa5",
+          borderRadius: "50%",
+          animation: "spin 0.7s linear infinite",
+        }}
+      />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
 }

@@ -1,10 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import type { AuthEmployee } from "../types";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,15 +28,7 @@ export default function LoginPage() {
 
       const data: AuthEmployee = await response.json();
 
-      sessionStorage.setItem("token", data.token);
-      sessionStorage.setItem("AuthEmployee", JSON.stringify(data.employee));
-      console.log("テスト" + data);
-      if (data.employee.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/");
-      }
-
+      login(data.employee, data.token);
       router.push("/");
     } catch (e) {
       setError("通信エラーが発生しました");

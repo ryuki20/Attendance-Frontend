@@ -5,6 +5,7 @@ import { AuthGuard } from "./components/AuthGuard";
 import { Calendar } from "./components/Calendar";
 import { PunchButton } from "./components/PunchButton";
 import { SummaryCards } from "./components/SummaryCards";
+import { useAuth } from "./context/AuthContext";
 import { apiFetch } from "./lib/api";
 import { AttendanceRecords, AttendanceResponse, Employee } from "./types";
 import { dateKey, isoToHHMM, toRecords } from "./utils";
@@ -13,6 +14,7 @@ type ToastState = { message: string; id: number };
 
 function MyPage({ employee }: { employee: Employee }) {
   const router = useRouter();
+  const { logout } = useAuth();
   const today = new Date();
   const todayKey = dateKey(today);
 
@@ -88,9 +90,7 @@ function MyPage({ employee }: { employee: Employee }) {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("AuthEmployee");
-    sessionStorage.removeItem("token");
-    router.push("/login");
+    logout();
   };
 
   const todayRecord = attendances![todayKey];
