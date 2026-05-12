@@ -6,7 +6,7 @@ import { isoToHHMM } from "@/src/app/utils";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-function EmployeeDetail({ employee }: { employee: Employee }) {
+function EmployeeDetail({}: { employee: Employee }) {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
