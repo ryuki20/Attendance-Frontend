@@ -61,6 +61,29 @@ function EmployeeDetail({}: { employee: Employee }) {
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm(`${detail!.name} を削除しますか？この操作は取り消せません`))
+      return;
+
+    try {
+      const res = await apiFetch(`/admin/employees/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error ?? "削除に失敗しました");
+        return;
+      }
+
+      router.push("/admin");
+    } catch (e) {
+      alert("通信エラーが発生しました");
+      console.error(e);
+    }
+  };
+
   if (loading) {
     return (
       <div
@@ -113,11 +136,61 @@ function EmployeeDetail({}: { employee: Employee }) {
           </h1>
         </div>
 
-        {/* 編集・保存ボタン */}
-        {isEditing ? (
-          <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8 }}>
+          {/* 削除ボタン(編集中は非表示) */}
+          {!isEditing && (
             <button
-              onClick={() => setIsEditing(false)}
+              onClick={handleDelete}
+              style={{
+                padding: "8px 16px",
+                borderRadius: 8,
+                border: "0.5px solid var(--red)",
+                background: "transparent",
+                fontSize: 13,
+                color: "var(--red)",
+                cursor: "pointer",
+              }}
+            >
+              削除
+            </button>
+          )}
+
+          {/* 編集・保存ボタン */}
+          {isEditing ? (
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                onClick={() => setIsEditing(false)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "0.5px solid var(--border)",
+                  background: "transparent",
+                  fontSize: 13,
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                }}
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleSave}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: 8,
+                  border: "none",
+                  background: "var(--blue)",
+                  color: "#fff",
+                  fontSize: 13,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                保存
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setIsEditing(true)}
               style={{
                 padding: "8px 16px",
                 borderRadius: 8,
@@ -128,40 +201,10 @@ function EmployeeDetail({}: { employee: Employee }) {
                 cursor: "pointer",
               }}
             >
-              キャンセル
+              編集
             </button>
-            <button
-              onClick={handleSave}
-              style={{
-                padding: "8px 16px",
-                borderRadius: 8,
-                border: "none",
-                background: "var(--blue)",
-                color: "#fff",
-                fontSize: 13,
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
-            >
-              保存
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsEditing(true)}
-            style={{
-              padding: "8px 16px",
-              borderRadius: 8,
-              border: "0.5px solid var(--border)",
-              background: "transparent",
-              fontSize: 13,
-              color: "var(--text-muted)",
-              cursor: "pointer",
-            }}
-          >
-            編集
-          </button>
-        )}
+          )}
+        </div>
       </div>
 
       {/* 社員情報カード */}
