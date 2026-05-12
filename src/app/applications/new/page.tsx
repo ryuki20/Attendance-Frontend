@@ -5,7 +5,7 @@ import { AuthGuard } from "../../components/AuthGuard";
 import { apiFetch } from "../../lib/api";
 import type { Employee } from "../../types";
 
-function NewApplicationForm(_: { employee: Employee }) {
+function NewApplicationForm({}: { employee: Employee }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [date, setDate] = useState(searchParams.get("date") ?? "");
@@ -55,6 +55,7 @@ function NewApplicationForm(_: { employee: Employee }) {
       router.push("/applications"); // 完了後は申請一覧へ
     } catch (e) {
       setError("通信エラーが発生しました");
+      console.error(e);
     } finally {
       setLoading(false);
     }

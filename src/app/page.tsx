@@ -86,6 +86,7 @@ function MyPage({ employee }: { employee: Employee }) {
       }
     } catch (e) {
       showToast("通信エラーが発生しました");
+      console.error(e);
     }
   };
 
