@@ -5,7 +5,7 @@ import { AdminGuard } from "../components/AdminGuard";
 import { apiFetch } from "../lib/api";
 import type { Employee, EmployeeListResponse } from "../types";
 
-function EmployeeList({ employee }: { employee: Employee }) {
+function EmployeeList({}: { employee: Employee }) {
   const router = useRouter();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [total, setTotal] = useState(0);
