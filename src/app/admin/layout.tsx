@@ -1,8 +1,7 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
-import { useAuth } from "../context/AuthContext";
 
 type Props = {
   children: React.ReactNode;
@@ -10,7 +9,7 @@ type Props = {
 
 export default function AdminLayout({ children }: Props) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const router = useRouter();
 
   const navItems = [
     { label: "社員一覧", href: "/admin" },
@@ -70,20 +69,20 @@ export default function AdminLayout({ children }: Props) {
 
         <div style={{ padding: "0 12px" }}>
           <button
-            onClick={logout}
+            onClick={() => router.push("/")}
             style={{
               width: "100%",
               padding: "8px 12px",
               borderRadius: 8,
               border: "0.5px solid var(--border)",
-              background: "transparent",
+              background: "var(--blue)",
               fontSize: 13,
-              color: "var(--text-muted)",
+              color: "#fff",
               cursor: "pointer",
-              textAlign: "left",
+              textAlign: "center",
             }}
           >
-            ログアウト
+            ← マイページ
           </button>
         </div>
       </aside>
