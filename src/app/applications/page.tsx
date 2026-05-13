@@ -54,6 +54,29 @@ function ApplicationList({}: { employee: Employee }) {
     fetch();
   }, [statusFilter]);
 
+  const handleCancel = async (id: string) => {
+    if (!confirm("この申請を取り消しますか?")) return;
+
+    try {
+      const res = await apiFetch(`/applications/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error ?? "取消に失敗しました");
+        return;
+      }
+
+      setApplications((prev) => prev.filter((app) => app.id !== id));
+      setTotal((prev) => prev - 1);
+    } catch (e) {
+      alert("通信エラーが発生しました");
+      console.error(e);
+    }
+  };
+
   const thStyle: React.CSSProperties = {
     padding: "10px 16px",
     fontSize: 12,
@@ -224,13 +247,14 @@ function ApplicationList({}: { employee: Employee }) {
                     <th style={thStyle}>申請理由</th>
                     <th style={thStyle}>ステータス</th>
                     <th style={thStyle}>申請日</th>
+                    <th style={{ ...thStyle, textAlign: "center" }}>操作</th>
                   </tr>
                 </thead>
                 <tbody>
                   {applications.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={7}
                         style={{
                           ...tdStyle,
                           textAlign: "center",
@@ -304,6 +328,25 @@ function ApplicationList({}: { employee: Employee }) {
                             }}
                           >
                             {app.created_at.slice(0, 10)}
+                          </td>
+                          <td style={{ ...tdStyle, textAlign: "center" }}>
+                            {app.status === "PENDING" && (
+                              <button
+                                onClick={() => handleCancel(app.id)}
+                                style={{
+                                  fontSize: 12,
+                                  padding: "4px 12px",
+                                  borderRadius: 6,
+                                  border: "0.5px solid var(--red)",
+                                  background: "transparent",
+                                  color: "var(--red)",
+                                  cursor: "pointer",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                取消
+                              </button>
+                            )}
                           </td>
                         </tr>
                       );
