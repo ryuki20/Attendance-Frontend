@@ -28,7 +28,7 @@ const STATUS_CONFIG: Record<
   REJECTED: { label: "却下", color: "var(--red)", bg: "rgba(163,45,45,0.1)" },
 };
 
-function RequestList({ employee }: { employee: Employee }) {
+function RequestList({}: { employee: Employee }) {
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
   const [total, setTotal] = useState(0);

@@ -16,6 +16,7 @@ function EmployeeDetail({}: { employee: Employee }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
+  const [error, setError] = useState("");
   const inputStyle: React.CSSProperties = {
     width: "100%",
     padding: "6px 10px",
@@ -47,16 +48,34 @@ function EmployeeDetail({}: { employee: Employee }) {
   }, [id]);
 
   const handleSave = async () => {
+    setError("");
+    const body: { name?: string; email?: string; role?: string } = {};
+    if (name !== detail!.name) body.name = name;
+    if (email !== detail!.email) body.email = email;
+    if (role !== detail!.role) body.role = role;
+
+    if (Object.keys(body).length === 0) {
+      setIsEditing(false);
+      return;
+    }
+
     try {
       const res = await apiFetch(`/admin/employees/${id}`, {
-        method: "PUT",
-        body: JSON.stringify({ name, email, role }),
+        method: "PATCH",
+        body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error("更新失敗");
-      const updated: EmployeeDetailResponse = await res.json();
-      setDetail(updated);
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error ?? "更新に失敗しました");
+        return;
+      }
+
+      setDetail({ ...detail!, ...data });
       setIsEditing(false);
     } catch (e) {
+      setError("通信エラーが発生しました");
       console.error(e);
     }
   };
@@ -257,6 +276,9 @@ function EmployeeDetail({}: { employee: Employee }) {
           <Field label="登録日">
             <span>{detail.created_at.slice(0, 10)}</span>
           </Field>
+          {error && (
+            <p style={{ fontSize: 12, color: "var(--red)" }}>{error}</p>
+          )}
         </div>
       </div>
 
